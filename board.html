@@ -354,6 +354,12 @@ img.px{image-rendering:pixelated}
 <script src="common.js"></script>
 <script>
 let S = freshState(), SERVER = null;
+/* 선생님 주소(끝에 #교사)에서만 검토 패널·자유 이동. 학생이 쓰는 칠판은 풀어야 다음 단계로 */
+const TEACHER = (()=>{ try{ return decodeURIComponent(location.hash).replace('#','')==='교사'; }catch(e){ return false; } })() || QS.get('review') === '1' || API === '/api';
+window.addEventListener('hashchange',()=>location.reload());
+const seenMat={};   // 이번 화면에서 연 자료(고리마다)
+function markSeen(i,k){ (seenMat[S.lesson+'-'+i]=seenMat[S.lesson+'-'+i]||new Set()).add(k); setTimeout(()=>{ try{ renderBottom(); }catch(e){} },0); }
+function hasSeen(i,k){ const z=seenMat[S.lesson+'-'+i]; return !!(z&&z.has(k)); }
 let CODE = QS.get('code') || localStorage.getItem('hfy_code') || (API === '/api' ? '123456' : (REMOTE ? '' : LOCAL_CODE));
 const $ = id => document.getElementById(id);
 const BALLS = ['S3_02_ball_red.webp','S3_03_ball_yellow.webp','S3_04_ball_teal.webp','S3_05_ball_indigo.webp','S3_06_ball_orange.webp','S3_07_ball_green.webp'];
@@ -512,7 +518,7 @@ function showVideo(i,k){
     <p style="font-size:22px;color:#6c6455;margin-top:10px">출처: ${esc(v.by)} (유튜브) · 화면이 안 나오면 <a href="https://www.youtube.com/watch?v=${encodeURIComponent(v.id)}" target="_blank">유튜브에서 열기</a>${v.ask?` · <b style="color:#976232">보고 나서: ${esc(v.ask)}</b>`:''}</p>`;
   $('bigv').classList.add('show');
 }
-function showPair(i){
+function showPair(i){ markSeen(i,'pair');
   const Rg=L().rings[i];
   $('bigv').innerHTML=`<button class="btn close" onclick="$('bigv').classList.remove('show')">닫기</button><h2 class="f">역사 연결 고리 ${i+1} · ${esc(Rg.name)} — ${Rg.together?'함께 보는 자료':'짝 A · 짝 B 자료'}</h2><div class="big">${textPanel(Rg.texts.A)}${textPanel(Rg.texts.B)}</div>`;
   $('bigv').classList.add('show');
@@ -540,7 +546,7 @@ function openCheck(){
   $('evs').querySelectorAll('.evr.hid').forEach(el=>el.onclick=()=>{ op.add(+el.dataset.ci); openCheck(); });
   $('chkAll').onclick=()=>{ M.pairs.forEach((_,i)=>op.add(i)); openCheck(); };
   $('evs').querySelectorAll('[data-ch]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); const k=S.lesson+'-'+S.ring+'-'+b.dataset.ch; chkHits[k]=chkHits[k]===b.dataset.g?'':b.dataset.g; openCheck(); });
-  $('evs').classList.add('show');
+  $('evs').classList.add('show'); try{ renderBottom(); }catch(e){}
 }
 function menu(c,e){
   closeMenu(); e.stopPropagation();
@@ -580,7 +586,7 @@ function startTimer(sec){ clearInterval(TM); const el=$('timer'); let t=sec; el.
   draw(); TM=setInterval(()=>{ t--; if(t<=0){ clearInterval(TM); el.textContent='⏱ 시간 끝!'; el.classList.add('end'); setTimeout(()=>{ el.style.display='none'; },5000); return; } draw(); },1000);
   el.onclick=()=>{ clearInterval(TM); el.style.display='none'; }; }
 /* 자료를 하나씩 크게 */
-function showOne(i,which){
+function showOne(i,which){ markSeen(i,which);
   const Rg=L().rings[i];
   const body = which==='memo' ? memoHTML(Rg) : `<div class="big one" style="max-width:1600px">${textPanel(Rg.texts[which])}</div>`;
   $('bigv').innerHTML=`<button class="btn close" onclick="$('bigv').classList.remove('show')">닫기</button><h2 class="f">역사 연결 고리 ${i+1} · ${esc(Rg.name)}</h2>${body}`;
@@ -646,7 +652,7 @@ function glossHTML(g){ if(!g) return '';
   return `<div class="gloss"><div class="gt">${ic('book','📖')} 낱말 풀이</div>${g.split(' · ').map(x=>{ const i=x.indexOf(':'); return i<0?`<div class="gi">${esc(x)}</div>`:`<div class="gi"><b>${esc(x.slice(0,i))}</b><span>${esc(x.slice(i+1).trim())}</span></div>`; }).join('')}</div>`; }
 function memoHTML(Rg){ const M=Rg.memory; if(!M) return Rg.intro?`<p style="font-size:28px;max-width:1500px;text-align:center;margin:0 0 16px">${esc(Rg.intro)}</p>`:'';
   return `<div class="memo">${spr(SP.clueCard,'',null,'position:absolute;right:-30px;top:-34px;width:80px')}<div class="mh f">${esc(M.ch)}</div>${esc(M.quote)}<div class="ms">${esc(M.src)}${/쇄미록/.test(M.src)?' · 『쇄미록』은 오희문이 임진왜란 동안 쓴 일기':''}</div>${glossHTML(M.gloss)}<div class="ma">→ ${esc(M.ask)}</div></div>`; }
-function showBig(i, memoOnly){
+function showBig(i, memoOnly){ markSeen(i,'pair'); if(memoOnly) markSeen(i,'memo');
   const Rg=L().rings[i]; let html;
   if(Rg.mode==='people') html=Rg.people.map(p=>`<div class="panel" style="font-size:24px"><h3 class="f">${esc(p.name)}</h3>${p.A.body}<div class="src">${esc(p.A.src)}</div></div>`).join('');
   else html=textPanel(Rg.texts.A)+textPanel(Rg.texts.B);
@@ -780,7 +786,7 @@ function openEvSheet(){
 }
 const PH={
   quiz:()=>{ const Q=L().quiz||[]; return {g:'point', say:`시작 퀴즈 ${qi+1}번! 문제를 읽어 줄게요. 모둠 보드에 답을 쓰고, “하나, 둘, 셋!”에 들어요.`, small:'정답을 본 뒤 맞힌 모둠 번호를 누르면 모둠 점수가 쌓여요.',
-    b:[[qshow?(qi<Q.length-1?'다음 문제 →':'퀴즈 끝 → 역사 연결 고리 1'):'정답 보기',()=>{ if(!qshow){qshow=true; qseen[qi]=true;} else { qshow=false; qi++; if(qi>=Q.length){ qi=0; S.phase='read'; } else qshow=!!qseen[qi]; } }],['퀴즈 건너뛰기',()=>{ qi=0; qshow=false; S.phase='read'; },'s']]}; },
+    b:[[qshow?(qi<Q.length-1?'다음 문제 →':'퀴즈 끝 → 역사 연결 고리 1'):'정답 보기',()=>{ if(!qshow){qshow=true; qseen[qi]=true;} else { qshow=false; qi++; if(qi>=Q.length){ qi=0; S.phase='read'; } else qshow=!!qseen[qi]; } }]].concat(TEACHER?[['퀴즈 건너뛰기',()=>{ qi=0; qshow=false; S.phase='read'; },'s']]:[])}; },
   read:()=>{ const Rg=R(); const b=[]; const needLink=S.ring>0 && !S.linked[S.ring-1];
     if(needLink){ if(Rg.bridgeA && !bridgeOpen) b.push([(Rg.bridgePage?Rg.bridgePage+'쪽 ':'')+'단서 보기',()=>{ bridgeOpen=true; },'s']);
       b.push(['이어져요! 사슬 연결',()=>{ S.linked[S.ring-1]=true; bridgeOpen=false; }]); }
@@ -837,17 +843,40 @@ function renderQuest(){
   $('quest').innerHTML=steps.map(([t,on,ok],i)=>`${i?'<span class="qarrow">›</span>':''}<span class="qs ${on?'on':ok?'ok':''}"><i>${ok&&!on?'✔':i+1}</i>${t}${on&&sub&&t.startsWith('역사')?` · ${sub}`:''}</span>`).join('')
     ;
 }
+/* 학생 칠판: 지금 단계를 마치기 전에는 다음 단계 버튼이 잠김. 이유를 돌려줌(없으면 열림) */
+function lockReason(){
+  if(TEACHER) return '';
+  const Rg=R(); if(!Rg) return '';
+  const mine=S.cards.filter(c=>c.ring===S.ring&&c.who!=='연표');
+  if(S.phase==='read'){
+    if(S.ring>0 && !S.linked[S.ring-1]) return '';
+    if(Rg.memory && !hasSeen(S.ring,'memo')) return (/쇄미록/.test(Rg.memory.src)?'① 게임 기억 카드':'① 함께 읽는 사료')+'를 먼저 열어요';
+    if(Rg.texts && !hasSeen(S.ring,'pair')) return '② 자료를 먼저 열어요';
+    return ''; }
+  if(S.phase==='pair'){
+    if(Rg.match){ const op=chkOpen[S.ring]; const n=op?op.size:0; return n>=Rg.match.pairs.length?'':`선 잇기 정답 확인에서 결과를 모두 열어요 (${n}/${Rg.match.pairs.length})`; }
+    return mine.length?'':'카드를 한 장 이상 넣어요'; }
+  if(S.phase==='together') return mine.length?'':'카드를 한 장 이상 넣어요';
+  if(S.phase==='check' && Rg.match){ const n=mine.filter(c=>c.k==='c').length, need=Rg.match.pairs.length; return n>=need?'':`모둠 한 줄을 ${need}모둠 모두 넣어요 (${n}/${need})`; }
+  if(S.phase==='sort'){ const left=mine.filter(c=>c.k==='c'&&!/^k\d/.test(c.who||'')).length; return left?`아직 나누지 않은 카드 ${left}장을 칸으로 옮겨요`:''; }
+  if(S.phase==='write') return S.cards.some(c=>c.ring===S.ring&&c.who==='연표')?'':'아래 칸에 우리 반 한 줄을 먼저 넣어요';
+  if(S.phase==='question') return S.cards.some(c=>c.k==='q')?'':'질문 카드를 한 장 이상 넣어요';
+  return '';
+}
+const isNext=t=>/→|완성/.test(t) && !/^다음 문제|^퀴즈 끝/.test(t);
 function renderBottom(){
   const p=PH[S.phase]; if(!p){ $('say').innerHTML='<small>진행 이끄미 says</small>먼저 오늘의 이끄미를 뽑아요.'; $('btns').innerHTML=''; $('guide').src='img/'+GUIDE.crank+'.webp'; return; }
   const o=p(); $('guide').src=`img/${GUIDE[o.g]}.webp`;
   $('say').innerHTML=`<small><img class="px" src="img/S4_04_badge_facilitator.webp" style="height:1.2em;vertical-align:-0.25em"> 진행 이끄미 says</small>${o.say}<small style="margin-top:4px">${o.small}</small>`;
-  $('btns').innerHTML=''; o.b.forEach(([t,f,cls])=>{const b=document.createElement('button'); b.className='btn'+(cls?' '+cls:''); b.textContent=t; b.onclick=()=>{f(); commit();}; $('btns').appendChild(b);});
+  const lock=lockReason(); if(lock) $('say').innerHTML+=`<small style="color:#F2B98F;margin-top:2px">🔒 ${esc(lock)}</small>`;
+  $('btns').innerHTML=''; o.b.forEach(([t,f,cls])=>{const b=document.createElement('button'); b.className='btn'+(cls?' '+cls:''); b.textContent=(lock&&isNext(t)?'🔒 ':'')+t;
+    if(lock&&isNext(t)){ b.disabled=true; b.style.opacity='.45'; b.title=lock; } else b.onclick=()=>{f(); commit();}; $('btns').appendChild(b);});
 }
 
 /* ---------------- 뽑기 ---------------- */
 function renderLotto(spin){
   $('lotto').classList.toggle('show', S.phase==='lotto'); if(S.phase!=='lotto') return;
-  $('lessonSel').value=String(S.lesson);
+  $('lessonSel').value=String(S.lesson); $('lessonSel').parentElement.style.display=TEACHER?'':'none';
   const d=$('dome'); d.innerHTML='';
   if(!S.names.filter(n=>!S.used.includes(n)).length) d.innerHTML='<div class="domeempty">아직 공이 없어요.<br>오른쪽에서 자원한 이름을 확정하거나 이름을 직접 넣어요.</div>';
   S.names.filter(n=>!S.used.includes(n)).forEach(n=>{
@@ -882,7 +911,7 @@ $('pass').onclick=()=>{ S.passUsed=true; S.leaders.pop(); commit(); };
 $('go').onclick=()=>{ S.phase=(L().quiz&&L().quiz.length)?'quiz':'read'; qi=0; qshow=false; commit(); };
 
 /* ---------------- 검토 패널 (시험 서버이거나 주소에 review=1) ---------------- */
-const REVIEW = API === '/api' || QS.get('review') === '1' || !REMOTE;
+const REVIEW = TEACHER;
 function jump(lesson, ring, phase){
   S.lesson=lesson; S.ring=ring; S.phase=phase;
   const n=lessonOf(S).rings.length;

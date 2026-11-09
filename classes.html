@@ -52,16 +52,19 @@ h1{margin:6px 0 0;font-size:44px}
 <script src="common.js"></script>
 <script>
 const CLASSES = ['3-1','3-2','3-3','3-4','3-5','3-6','3-7','3-8','3-9'];
+const TH = (()=>{ try{ return decodeURIComponent(location.hash)==='#교사' ? '#교사' : ''; }catch(e){ return ''; } })();
+window.addEventListener('hashchange',()=>location.reload());
 const NUMS = Object.keys(LESSONS).map(Number);
 document.getElementById('kick').innerHTML = `<b>${esc(SERIES.school)}</b> ${esc(SERIES.slogan)} <span>${esc(SERIES.of)}</span>`;
 function stateOf(c){ try { return JSON.parse(localStorage.getItem('hfy_state_' + c)) || null; } catch (e) { return null; } }
 function doneOf(c){ try { return JSON.parse(localStorage.getItem('hfy_done_' + c)) || {}; } catch (e) { return {}; } }
+if (TH) document.querySelector('.sub').insertAdjacentHTML('beforeend', ' <b style="color:#E8C27A">· 선생님 주소예요. 칠판에 검토 패널이 보이고 단계를 자유롭게 오갈 수 있어요.</b>');
 document.getElementById('grid').innerHTML = CLASSES.map(c => {
   const st = stateOf(c), dn = doneOf(c);
   if (st && st.phase === 'end') dn[st.lesson] = true;
   const info = st ? `마지막: ${st.lesson}차시${st.leaders && st.leaders.length ? ' · 이끄미 ' + st.leaders.map(esc).join(', ') : ''}` : '아직 열지 않았어요';
   return `<div class="cls"><h2 class="f">${esc(c)}<small>${info}</small></h2>
-    <div class="les">${NUMS.map(n => `<a href="board.html?class=${encodeURIComponent(c)}&lesson=${n}" class="${st && st.lesson === n ? 'last' : ''} ${dn[n] ? 'done' : ''}"><b>${n}차시</b><span>${esc((LESSONS[n].title.split('—')[1] || '').trim().slice(0, 16))}</span></a>`).join('')}</div></div>`;
+    <div class="les">${NUMS.map(n => `<a href="board.html?class=${encodeURIComponent(c)}&lesson=${n}${TH}" class="${st && st.lesson === n ? 'last' : ''} ${dn[n] ? 'done' : ''}"><b>${n}차시</b><span>${esc((LESSONS[n].title.split('—')[1] || '').trim().slice(0, 16))}</span></a>`).join('')}</div></div>`;
 }).join('');
 </script>
 </body></html>
