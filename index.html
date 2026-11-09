@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko"><head><meta name="robots" content="noindex, nofollow"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>학급 고르기 — 역사 흐름 연표</title>
+<style>
+@font-face{font-family:'Cafe24 Ssurround';src:url(fonts/Cafe24Ssurround.woff2) format('woff2'),url(fonts/Cafe24Ssurround.ttf) format('truetype');font-display:swap}
+@font-face{font-family:'SeoulHangangJang';src:url(fonts/SeoulHangangJangM.woff2) format('woff2');font-weight:normal;font-display:swap}
+@font-face{font-family:'SeoulHangangJang';src:url(fonts/SeoulHangangJangB.woff2) format('woff2');font-weight:bold;font-display:swap}
+:root{--g:#25392F;--b:#976232;--p:#F4EFE3;--line:#C9BFA6;--red:#C8553D;--gold:#E8C27A}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden;margin:0;min-height:100%;background:#1b241f;font-family:'SeoulHangangJang','맑은 고딕',sans-serif;color:var(--g);word-break:keep-all}
+.f{font-family:'Cafe24 Ssurround','SeoulHangangJang',sans-serif;font-weight:normal}
+.wrap{max-width:1700px;margin:0 auto;padding:28px 32px 40px}
+.top{background:var(--g);color:#FFF9EA;border-radius:24px;padding:20px 28px;display:flex;align-items:center;gap:22px}
+.top img{height:84px;image-rendering:pixelated}
+.kick{display:inline-flex;gap:10px;align-items:center;background:var(--gold);color:#2b2416;border-radius:999px;padding:3px 16px 4px 5px;font-size:20px}
+.kick b{background:#2F5E4E;color:#fff;border-radius:999px;padding:1px 12px;font-weight:normal}
+h1{margin:6px 0 0;font-size:44px}
+.sub{color:#D9E6DC;font-size:21px;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px}
+.cls{min-width:0;background:var(--p);border:4px solid var(--line);border-radius:22px;padding:14px 18px 16px;display:flex;flex-direction:column;gap:10px}
+.cls h2{margin:0;font-size:40px;display:flex;align-items:baseline;gap:12px}
+.cls h2 small{font-family:'SeoulHangangJang',sans-serif;font-size:19px;color:#7a6f5c}
+.les{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.les a{min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--g);background:#fffdf8;border:3px solid var(--line);border-radius:16px;padding:10px 4px;min-height:86px}
+.les a b{font-family:'Cafe24 Ssurround',sans-serif;font-weight:normal;font-size:30px}
+.les a span{font-size:15px;color:#7a6f5c;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.les a:hover{border-color:var(--b);box-shadow:0 0 0 4px #E8B04A55}
+.les a.last{background:#FFF1DC;border-color:var(--red)}
+.les a.last span{color:var(--red)}
+.les a{position:relative}.les a.done::after{content:'✓';position:absolute;top:4px;right:7px;font-size:20px;color:#2F7A72;font-weight:bold}
+.info{font-size:18px;color:#5a4a30;min-height:1.4em}
+.foot{margin-top:22px;color:#cfd8d2;font-size:18px;line-height:1.6;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot a{color:var(--gold)}
+@media (max-width:1100px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.les a b{font-size:24px}}
+@media (max-width:700px){.wrap{padding:16px}.grid{grid-template-columns:1fr}h1{font-size:30px}.top img{display:none}}
+</style></head><body><div class="wrap">
+  <div class="top">
+    <img src="img/S6_02_researcher_point.webp" alt="" onerror="this.remove()">
+    <div>
+      <div class="kick f" id="kick"></div>
+      <h1 class="f">역사 흐름 연표 — 우리 반을 골라요</h1>
+      <div class="sub">반 이름 아래에서 오늘 차시를 누르면 그 반의 전자칠판이 열려요. 반마다 이끄미·모둠 카드·우리 반 연표가 따로 저장돼요.</div>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="foot">
+    <span>빨간 테두리 = 이 컴퓨터에서 그 반이 마지막으로 연 차시 · ✓ = 역사 연결 사슬 말하기까지 마친 차시</span>
+    <span>저장은 이 컴퓨터의 브라우저에 돼요. 차시가 끝나면 「우리 반 연표」 화면을 찍어 두면 안전해요.</span>
+  </div>
+</div>
+<script src="common.js"></script>
+<script>
+const CLASSES = ['3-1','3-2','3-3','3-4','3-5','3-6','3-7','3-8','3-9'];
+const NUMS = Object.keys(LESSONS).map(Number);
+document.getElementById('kick').innerHTML = `<b>${esc(SERIES.school)}</b> ${esc(SERIES.slogan)} <span>${esc(SERIES.of)}</span>`;
+function stateOf(c){ try { return JSON.parse(localStorage.getItem('hfy_state_' + c)) || null; } catch (e) { return null; } }
+function doneOf(c){ try { return JSON.parse(localStorage.getItem('hfy_done_' + c)) || {}; } catch (e) { return {}; } }
+document.getElementById('grid').innerHTML = CLASSES.map(c => {
+  const st = stateOf(c), dn = doneOf(c);
+  if (st && st.phase === 'end') dn[st.lesson] = true;
+  const info = st ? `마지막: ${st.lesson}차시${st.leaders && st.leaders.length ? ' · 이끄미 ' + st.leaders.map(esc).join(', ') : ''}` : '아직 열지 않았어요';
+  return `<div class="cls"><h2 class="f">${esc(c)}<small>${info}</small></h2>
+    <div class="les">${NUMS.map(n => `<a href="board.html?class=${encodeURIComponent(c)}&lesson=${n}" class="${st && st.lesson === n ? 'last' : ''} ${dn[n] ? 'done' : ''}"><b>${n}차시</b><span>${esc((LESSONS[n].title.split('—')[1] || '').trim().slice(0, 16))}</span></a>`).join('')}</div></div>`;
+}).join('');
+</script>
+</body></html>
