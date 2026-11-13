@@ -21,9 +21,9 @@ h1{margin:6px 0 0;font-size:44px}
 .cls{min-width:0;background:var(--p);border:4px solid var(--line);border-radius:22px;padding:14px 18px 16px;display:flex;flex-direction:column;gap:10px}
 .cls h2{margin:0;font-size:40px;display:flex;align-items:baseline;gap:12px}
 .cls h2 small{font-family:'SeoulHangangJang',sans-serif;font-size:19px;color:#7a6f5c}
-.les{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.les{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.les a.prep b{color:#976232}
 .les a{min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--g);background:#fffdf8;border:3px solid var(--line);border-radius:16px;padding:10px 4px;min-height:86px}
-.les a b{font-family:'Cafe24 Ssurround',sans-serif;font-weight:normal;font-size:30px}
+.les a b{font-family:'Cafe24 Ssurround',sans-serif;font-weight:normal;font-size:27px;white-space:nowrap}
 .les a span{font-size:15px;color:#7a6f5c;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
 .les a:hover{border-color:var(--b);box-shadow:0 0 0 4px #E8B04A55}
 .les a.last{background:#FFF1DC;border-color:var(--red)}
@@ -62,9 +62,9 @@ if (TH) document.querySelector('.sub').insertAdjacentHTML('beforeend', ' <b styl
 document.getElementById('grid').innerHTML = CLASSES.map(c => {
   const st = stateOf(c), dn = doneOf(c);
   if (st && st.phase === 'end') dn[st.lesson] = true;
-  const info = st ? `마지막: ${st.lesson}차시${st.leaders && st.leaders.length ? ' · 이끄미 ' + st.leaders.map(esc).join(', ') : ''}` : '아직 열지 않았어요';
+  const info = st ? `마지막: ${LNAME(st.lesson)}${st.leaders && st.leaders.length ? ' · 이끄미 ' + st.leaders.map(esc).join(', ') : ''}` : '아직 열지 않았어요';
   return `<div class="cls"><h2 class="f">${esc(c)}<small>${info}</small></h2>
-    <div class="les">${NUMS.map(n => `<a href="board.html?class=${encodeURIComponent(c)}&lesson=${n}${TH}" class="${st && st.lesson === n ? 'last' : ''} ${dn[n] ? 'done' : ''}"><b>${n}차시</b><span>${esc((LESSONS[n].title.split('—')[1] || '').trim().slice(0, 16))}</span></a>`).join('')}</div></div>`;
+    <div class="les">${NUMS.map(n => `<a href="board.html?class=${encodeURIComponent(c)}&lesson=${n}${TH}" class="${st && st.lesson === n ? 'last' : ''} ${dn[n] ? 'done' : ''} ${LESSONS[n].prep ? 'prep' : ''}"><b>${LNAME(n)}</b><span>${esc((LESSONS[n].title.split('—')[1] || '').trim().slice(0, 16))}</span></a>`).join('')}</div></div>`;
 }).join('');
 </script>
 </body></html>

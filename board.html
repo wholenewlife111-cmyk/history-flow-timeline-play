@@ -278,7 +278,7 @@ img.px{image-rendering:pixelated}
 .tray .cline{flex:1 1 30%;max-width:33%}
 .cline[data-g="1"]{--gc:#D9534F;--gt:#FBE3E1}.cline[data-g="2"]{--gc:#E8A33A;--gt:#FCEFD6}.cline[data-g="3"]{--gc:#4C9A5B;--gt:#E0F1E2}.cline[data-g="4"]{--gc:#3C7DC4;--gt:#DFEBF8}.cline[data-g="5"]{--gc:#8A5CC2;--gt:#ECE3F7}.cline[data-g="6"]{--gc:#C25C94;--gt:#F4CDE2}
 .ring.active.ph-write .rq{display:none}.ring.ph-write .cline{font-size:19px;padding:5px 8px 5px 40px}.ring.ph-write .cat h4{font-size:24px}
-.lframe{font-size:25px;color:#25392F;background:#FFF1DC;border:3px solid #E2B06A;border-radius:14px;padding:8px 14px;margin:8px 0 0;line-height:1.45}.lframe b{display:inline-block;background:#976232;color:#fff !important;border-radius:999px;padding:0 12px;margin-right:8px;font-weight:normal;font-family:'Cafe24 Ssurround','SeoulHangangJang',sans-serif;font-size:20px}
+.lframe{font-size:25px;color:#25392F;background:#FFF1DC;border:3px solid #E2B06A;border-radius:14px;padding:8px 14px;margin:8px 0 0;line-height:1.45}.prepsum{flex:1;background:#fffdf8;border:3px solid #C9BFA6;border-radius:22px;padding:22px 30px;font-size:30px;display:flex;flex-direction:column}.prepsum h3{margin:0 0 10px;font-size:34px;color:#5a3a16}.prepsum .pex{color:#5a5446;margin:10px 0 14px}.prepsum .ptop{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-auto-rows:1fr;gap:14px}.prepsum .ptop div{border:2px solid #C9BFA6;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;justify-content:center;gap:8px}.prepsum .ptop b{font-size:38px}.prepsum .gb2{font-size:26px}.prepsum .ptop .gb2{align-self:flex-start}.prepsum small{color:#8a8070;font-size:20px}.lframe .lhint{margin-top:6px;font-size:1em;color:#3d3a33}.lframe .lhint span{letter-spacing:.08em;color:#8A4521;font-weight:bold;font-size:1.2em}.lframe .lhint b{background:#C9BFA6 !important}.lframe b{display:inline-block;background:#976232;color:#fff !important;border-radius:999px;padding:0 12px;margin-right:8px;font-weight:normal;font-family:'Cafe24 Ssurround','SeoulHangangJang',sans-serif;font-size:20px}
 .blkwrap .blk{margin:2px 0 10px}
 .blkwrap .bh{display:flex;align-items:baseline;gap:10px;border-bottom:3px solid #976232;padding-bottom:2px;margin-bottom:6px}
 .blkwrap .bh span{font-size:27px;color:#5a3a16}.blkwrap .bh small{font-size:18px;color:#8a8070}
@@ -370,7 +370,7 @@ const FLAG = [SP.flagRed, SP.flagYellow, SP.flagTeal];
 function fit(){ const k=Math.min(innerWidth/1920, innerHeight/1080); $('stage').style.transform=`translate(-50%,-50%) scale(${k})`; }
 addEventListener('resize', fit); fit();
 $('cls').textContent='학급 '+CLASS;
-$('lessonSel').innerHTML=Object.keys(LESSONS).map(n=>`<option value="${n}">${n}차시</option>`).join('');
+$('lessonSel').innerHTML=Object.keys(LESSONS).map(n=>`<option value="${n}">${LNAME(n)}</option>`).join('');
 $('lessonSel').onchange=e=>{ S.lesson=+e.target.value; S.ring=0; commit(); };
 
 /* ---------------- 연결 고리 ---------------- */
@@ -387,6 +387,7 @@ function laneHTML(i,k,who,label){
   return `<div class="lane ${k}${fold?' fold':''}" data-r="${i}" data-k="${k}" data-w="${esc(who||'')}">${label?`<div class="lh f" data-lf="${k}">${label}<span class="cnt">${n}장</span></div>`:''}</div>`; }
 function renderMain(){
   const m=$('main'); m.innerHTML=''; const rings=L().rings;
+  if(L().prep){ const P=L().sum; m.innerHTML=`<div class="prepsum"><h3 class="f">양 난 정리 · 모둠 보드 한 줄</h3><div class="lframe"><b style="color:#976232">문장 틀</b> ${esc(P.frame)}</div><p class="pex">예) ${esc(P.ex)}</p><div class="ptop">${P.topics.map(([g,t,pg])=>`<div><span class="gb2">${g}</span><b>${esc(t)}</b><small>교과서 ${pg}쪽</small></div>`).join('')}</div></div>`; return; }
   rings.forEach((Rg,i)=>{
     if(i>0){ const lk=S.linked[i-1]; const l=document.createElement('div'); l.className='link'+(lk?' done':'');
       l.innerHTML=`<b class="f" style="font-size:19px">역사 연결 사슬</b><img class="px" src="img/${lk?'S5_02_chain_connected':'S5_01_chain_open'}.webp"><div style="font-size:17px">${lk?'이어졌어요!':'고리 1의 결과가<br>고리 2의 까닭?'}</div>`; m.appendChild(l); }
@@ -406,7 +407,7 @@ function renderMain(){
         <button class="mini" data-big="${i}">${spr(SP.magnify,'🔍')}자료 크게</button></div>
       ${showBridge?`<div class="bridge"><img class="px" src="img/S5_02_chain_connected.webp" style="height:1.4em;vertical-align:-0.35em"> ${esc(Rg.bridgeQ)}${Rg.bridgeFrame?`<div class="bframe"><b>문장 틀</b> ${esc(Rg.bridgeFrame)}</div>`:''}${Rg.bridgeKeys?`<div class="bkeys"><b>키워드</b> ${Rg.bridgeKeys.split(' · ').map(k=>`<span>${esc(k)}</span>`).join('')}</div>`:''}${Rg.bridgeA&&bridgeOpen?`<div style="margin-top:4px;color:#2F7A72"><b>교과서 단서</b> ${esc(Rg.bridgeA)}</div>`:''}</div>`:''}
       ${active&&Rg.match?nowHTML(Rg):''}<div class="rq">${esc(Rg.q)}</div>${body}
-      ${active&&S.phase==='write'?`${Rg.lineFrame?`<div class="lframe"><b style="color:#976232">문장 틀</b> ${esc(Rg.lineFrame)}</div>`:''}<div class="together-in"><span class="f" style="font-size:21px;color:#976232;white-space:nowrap">우리 반 한 줄</span><input id="lin" value="${esc((S.cards.find(c=>c.ring===i&&c.who==='연표')||{}).t||'')}" placeholder="${esc(Rg.lineFrame||'○○ 때문에 → △△ 했다.')} (기록 이끄미)"><button id="ladd">넣기</button></div>`:''}
+      ${active&&S.phase==='write'?`${Rg.lineFrame?`<div class="lframe"><b style="color:#976232">문장 틀</b> ${esc(Rg.lineFrame)}${Rg.lineKeys?`<div class="lhint"><b>초성 힌트</b> 괄호 순서대로 <span>${esc(chos(Rg.lineKeys))}</span></div>`:''}</div>`:''}<div class="together-in"><span class="f" style="font-size:21px;color:#976232;white-space:nowrap">우리 반 한 줄</span><input id="lin" value="${esc((S.cards.find(c=>c.ring===i&&c.who==='연표')||{}).t||'')}" placeholder="${esc(Rg.lineFrame||'○○ 때문에 → △△ 했다.')} (기록 이끄미)"><button id="ladd">넣기</button></div>`:''}
       ${active&&Rg.match&&S.phase==='pair'?`<div class="together-in"><span class="f" style="font-size:20px;color:#976232">막힌 모둠</span>${gsel()}<button id="tflag">${spr(SP.flagYellow,'🚩',null,'width:26px;vertical-align:middle')} 도움 깃발</button></div>`:''}
       ${active&&Rg.match&&S.phase==='check'?`<div class="together-in"><span class="f" style="font-size:20px;color:#976232;white-space:nowrap">모둠 한 줄</span>${gsel()}<input id="lc" placeholder="까닭: ○○" style="flex:1"><span class="f" style="font-size:20px;color:#2F7A72;white-space:nowrap">때문에 →</span><input id="lr" placeholder="결과: △△ 했다." style="flex:1"><button id="gadd">넣기</button><button id="tflag">${spr(SP.flagYellow,'🚩',null,'width:26px;vertical-align:middle')} 도움</button></div>`:''}
       ${active&&!Rg.match&&['pair','together','check','question'].includes(S.phase)?`<div class="together-in"><span class="f" style="font-size:17px;color:#976232;white-space:nowrap">칠판에 쓰기</span><select id="tg" style="font-size:18px;border-radius:10px">${['학급','1','2','3','4','5','6'].map(g=>`<option value="${g}" ${g===tg?'selected':''}>${g==='학급'?'학급':g+'모둠'}</option>`).join('')}</select>${S.phase==='question'?'<span style="font-size:17px;color:#6D5D93">질문 카드</span>':`${Rg.mode==='people'?`<select id="twho" style="font-size:18px;border-radius:10px">${Rg.people.map(p=>`<option ${p.name===twho?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`:''}<button class="c ${tk==='c'?'on':''}" data-tk="c">까닭</button><button class="r ${tk==='r'?'on':''}" data-tk="r">결과</button>`}<input id="tin" placeholder="${S.phase==='question'?'모둠이 정한 질문':'모둠이 정한 의견을 한 문장으로'} (기록 이끄미)"><button id="tadd">넣기</button>${S.phase==='question'?'':`<button id="tflag" title="막힌 모둠에 도움 깃발">${spr(SP.flagYellow,'🚩',null,'width:26px;vertical-align:middle')} 도움</button>`}</div>`:''}
@@ -457,9 +458,15 @@ function renderMain(){
 }
 let tk='c', twho='', tg='학급';
 function gsel(){ return `<select id="tg" style="font-size:21px;border-radius:10px">${['학급','1','2','3','4','5','6'].map(g=>`<option value="${g}" ${g===tg?'selected':''}>${g==='학급'?'모둠 고르기':g+'모둠'}</option>`).join('')}</select>`; }
-function flowOf(Rg){ return Rg.flow || ['read','pair','check','sort','write']; }
+function flowOf(Rg){ return Rg.flow || (Rg.cats?['read','pair','sort','write']:['read','pair','write']); }
+/* 분류하기: 선 잇기로 이은 짝을 카드로 불러와 칸에 나눔(모둠 한 줄은 학습지에 손으로 씀) */
+function seedSort(i){ const Rg=L().rings[i]; if(!Rg||!Rg.match||!Rg.cats) return;
+  if(S.cards.some(c=>c.ring===i&&c.k==='c'&&c.who!=='연표')) return;
+  Rg.match.pairs.forEach((p,n)=>S.cards.push({ring:i,k:'c',t:p[0]+' → '+p[2],m:'짝 '+'①②③④⑤⑥⑦'[n],who:''})); }
+function toPh(ph){ if(ph==='sort') seedSort(S.ring); S.phase=ph; laneFocus=''; }
+const chos = a => (a||[]).map(w=>'('+cho(w)+')').join('  ');
 function nextPh(ph){ const f=flowOf(R()); const i=f.indexOf(ph); return f[i+1]||'write'; }
-const PHNAME={pair:'선 잇기',check:'모둠 한 줄',sort:'분류하기',write:'우리 반 한 줄'};
+const PHNAME={read:'자료 읽기',pair:'선 잇기',check:'모둠 한 줄',sort:'분류하기',write:'우리 반 한 줄'};
 function blocksHTML(T,big){ if(!T.blocks) return `<div>${T.body}</div>`;
   return T.blocks.map(b=>`<div class="blk"><div class="bh"><span class="f">${esc(b.h)}</span><small>${esc(b.p)}${/^[0-9~·]+$/.test(b.p)?'쪽':''}</small></div>`+
     (b.items?`<ul>${b.items.map(x=>`<li>${x}</li>`).join('')}</ul>`:'')+
@@ -472,21 +479,22 @@ function pairListHTML(i){ const M=L().rings[i].match; return `<div class="cats" 
 function nowHTML(Rg){
   const ph=S.phase, link=S.ring>0&&!S.linked[S.ring-1];
   const t = link&&ph==='read' ? ['역사 연결 사슬',`위의 사슬 질문을 모둠에서 30초 이야기하고 손을 들어 답해요. 그다음 ${Rg.bridgePage||''}쪽 단서로 확인!`]
+    : Rg.lecture&&ph==='read' ? ['선생님 강의',`선생님이 <b>학습지에 채울 내용</b>을 먼저 알려 줘요. 학습지를 함께 채우고, ${(Rg.video||[]).some(v=>!v.opt)?'영상을 본 뒤 ':''}연표로 정리하는 설명을 들어요.`]
     : ({read:['자료 읽기',`${(Rg.video||[]).filter(v=>!v.opt).length?'영상을 함께 보고, ':''}${Rg.memory?(/쇄미록/.test(Rg.memory.src)?'게임 기억 카드를 함께 읽고, ':'첫 사료를 함께 읽고, '):''}${Rg.readNote||'짝 A와 짝 B는 각자 자료를'} ${Rg.together?'함께':'<b>동시에</b>'} 읽으며 학습지 ‘찾기’를 채워요. ⏱ 3분`],
         pair: Rg.together ? ['다 함께 선 잇기','진행 이끄미가 자료를 함께 읽어요. 「선 잇기 정답 확인」에서 <b>초성 힌트</b>를 보고 손을 들어 결과를 맞혀요. ⏱ 5분']
                           : ['선 잇기','짝끼리 읽은 것을 설명하고, 모둠이 함께 학습지 <b>선 잇기</b>를 해요. 다 하면 정답 확인! ⏱ 5분'],
         check:['모둠 한 줄','<b>모둠 번호와 같은 번호의 짝</b>을 맡아 모둠 보드에 “○○ 때문에 → △△ 했다.”로 쓰고, 들어서 발표해요. ⏱ 2분'],
-        sort:['분류하기',`칠판의 모둠 한 줄이 <b>${(Rg.cats||[]).map(c=>c.n).join(' · ')}</b> 가운데 어느 칸인지 함께 정해요. 빈 칸은 다른 모둠이 채워요.`],
+        sort:['분류하기',`선 잇기로 이은 짝이 <b>${(Rg.cats||[]).map(c=>c.n).join(' · ')}</b> 가운데 어느 칸인지 함께 정해요. 빈 칸은 다른 모둠이 채워요.`],
         write:['우리 반 한 줄',`${Rg.cats?'세 칸을':'선 잇기에서 이은 까닭 → 결과를'} 보고 문장 틀을 채워 <b>우리 반 한 줄</b>을 만들어요. 그다음 각자 「역사 흐름 연표」에 써요.`]})[ph];
   const k = link&&ph==='read' ? '' : ({read:'book',pair:'link',check:'board',sort:'sort',write:'write'})[ph];
   return t?`<div class="now">${k?ic(k,'',  '44px'):'<img class="px" src="img/S5_02_chain_connected.webp" style="height:44px">'}<b class="nt">지금 할 일 · ${t[0]}</b><span>${t[1]}</span></div>`:'';
 }
-function clineHTML(c,star){ const g=groupOf(c); const [a,b]=String(c.t).split(' → ');
-  return `<div class="cline ${star===c.t?'star':''}" data-g="${g}"><span class="gb2">${g}</span><span style="color:#24605A">${esc(a)}</span> → <span style="color:#8A4521">${esc(b||'')}</span></div>`; }
+function clineHTML(c,star){ const g=groupOf(c); const [a,b]=String(c.t).split(' → '); const pn=(String(c.m||'').match(/^짝 (.)/)||[])[1];
+  return `<div class="cline ${star===c.t?'star':''}" data-g="${g}"><span class="gb2">${pn||g}</span><span style="color:#24605A">${esc(a)}</span> → <span style="color:#8A4521">${esc(b||'')}</span></div>`; }
 function catsHTML(i){
   const Rg=L().rings[i]; const cs=S.cards.filter(c=>c.ring===i&&c.k==='c'&&c.who!=='연표'); const star=(S.cards.find(c=>c.ring===i&&c.who==='연표')||{}).t;
   const un=cs.filter(c=>!/^k\d$/.test(c.who||''));
-  if(!cs.length) return `<div class="tray" style="justify-content:center"><span class="tl0 f" style="font-size:24px">아직 모둠 한 줄 카드가 없어요. 「모둠 한 줄」 단계에서 기록 이끄미가 넣은 카드가 여기에 모여요.${REVIEW?' (검토할 때는 왼쪽 아래 「예시 카드 넣기」)':''}</span></div><div class="cats">${Rg.cats.map(ct=>`<div class="cat"><h4>${ct.ic?ic(ct.ic,'','40px')+' ':''}${esc(ct.n)}<small>${esc(ct.h)}</small></h4><div class="empty">비어 있어요</div></div>`).join('')}</div>`;
+  if(!cs.length) return `<div class="tray" style="justify-content:center"><span class="tl0 f" style="font-size:24px">아직 카드가 없어요. 「분류하기」로 들어오면 선 잇기로 이은 짝이 여기에 모여요.${REVIEW?' (검토할 때는 왼쪽 아래 「예시 카드 넣기」)':''}</span></div><div class="cats">${Rg.cats.map(ct=>`<div class="cat"><h4>${ct.ic?ic(ct.ic,'','40px')+' ':''}${esc(ct.n)}<small>${esc(ct.h)}</small></h4><div class="empty">비어 있어요</div></div>`).join('')}</div>`;
   return `${un.length?`<div class="tray"><span class="tl0 f">아직 안 나눈 카드 →</span>${un.map(c=>clineHTML(c,star)).join('')}</div>`:''}
    <div class="cats">${Rg.cats.map((ct,ci)=>{ const inC=cs.filter(c=>c.who==='k'+ci);
      return `<div class="cat"><h4>${ct.ic?ic(ct.ic,'','40px')+' ':''}${esc(ct.n)}<small>${esc(ct.h)}</small></h4>${inC.map(c=>clineHTML(c,star)).join('')||'<div class="empty">비어 있어요 — 채울 수 있는 모둠?</div>'}</div>`; }).join('')}</div>`;
@@ -511,9 +519,9 @@ function readCardsHTML(i){
   const art=Rg.art?`<div class="rart">${spr(Rg.art.img,'','','height:64px;width:auto')}${Rg.art.items.length?`<div class="ritems">${Rg.art.items.map(k=>`<span>${ic(k,'','48px')}<b>?</b></span>`).join('')}</div>`:''}<div class="rask f">${esc(Rg.art.ask)}</div></div>`:'';
   return art+`<div class="rcards" style="grid-template-columns:${cards.map(c=>/optv/.test(c)?'0.7fr':/rcard vid|rcard memo1/.test(c)?'0.85fr':'1.2fr').join(' ')}">${cards.join('')}</div>`;
 }
-function showVideo(i,k){
-  const v=(L().rings[i].video||[])[k]; if(!v) return;
-  $('bigv').innerHTML=`<button class="btn close" onclick="$('bigv').innerHTML='';$('bigv').classList.remove('show')">닫기</button><h2 class="f">역사 연결 고리 ${i+1} · 영상 — ${esc(v.t)} <small style="font-size:24px;color:#6c6455">${esc(v.len)}</small></h2>
+function showVideo(i,k){ const v=(L().rings[i].video||[])[k]; if(v) showVideoOf(v,'역사 연결 고리 '+(i+1)); }
+function showVideoOf(v,head){
+  $('bigv').innerHTML=`<button class="btn close" onclick="$('bigv').innerHTML='';$('bigv').classList.remove('show')">닫기</button><h2 class="f">${esc(head)} · 영상 — ${esc(v.t)} <small style="font-size:24px;color:#6c6455">${esc(v.len)}</small></h2>
     ${v.before?`<div class="vbefore big"><b>보기 전에</b> ${esc(v.before)}</div>`:''}<div style="width:1440px;height:${v.before?740:810}px;background:#000;border-radius:18px;overflow:hidden"><iframe width="1440" height="${v.before?740:810}" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}?rel=0" title="${esc(v.t)}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
     <p style="font-size:22px;color:#6c6455;margin-top:10px">출처: ${esc(v.by)} (유튜브) · 화면이 안 나오면 <a href="https://www.youtube.com/watch?v=${encodeURIComponent(v.id)}" target="_blank">유튜브에서 열기</a>${v.ask?` · <b style="color:#976232">보고 나서: ${esc(v.ask)}</b>`:''}</p>`;
   $('bigv').classList.add('show');
@@ -670,12 +678,12 @@ function renderQuiz(){
   const Q=L().quiz||[]; const q=Q[qi]; if(!q){ return; }
   const hits=qhits[qi]||[];
   const total=scoreTotals();
-  $('quiz').innerHTML=`<h2 class="f" style="margin-bottom:4px">시작 퀴즈</h2>
-    <div class="qtabs">${Q.map((_,i)=>`<button class="f ${i===qi?'on':''} ${qseen[i]?'seen':''}" data-qi="${i}">${i+1}</button>`).join('')}</div>
-    <div style="font-size:27px;color:#3d4a42">모둠이 함께 <b>모둠 보드</b>에 답을 써요 → “하나, 둘, 셋!”에 다 같이 들어요</div>
+  $('quiz').innerHTML=`<h2 class="f" style="margin-bottom:4px">${L().prep?'모둠 보드 퀴즈':'시작 퀴즈'}${q.sec?` <span style="color:#976232">· ${esc(q.sec)}</span>`:''}</h2>
+    <div class="qtabs">${Q.map((x,i)=>`<button class="f ${i===qi?'on':''} ${qseen[i]?'seen':''}" data-qi="${i}">${x.video?'▶':Q.slice(0,i+1).filter(y=>!y.video).length}</button>`).join('')}</div>
+    <div style="font-size:27px;color:#3d4a42">${q.video?'영상을 함께 보고, 다음 호란 퀴즈로 확인해요':'모둠이 함께 <b>모둠 보드</b>에 답을 써요 → “하나, 둘, 셋!”에 다 같이 들어요'}</div>
     <div class="qboard" style="height:440px;width:1000px">${spr(SP.quizBoard,'<div style="position:absolute;inset:0;background:#fff;border:10px solid #8B6A3E;border-radius:30px"></div>')}<div class="qt" style="width:56%;margin-top:56px;font-size:${q.q.length>24?36:q.q.length>16?42:48}px">${esc(q.q)}</div></div>
     ${q.hint?`<div class="qhint">${spr(SP.lantern,'💡','','height:1.3em;width:auto;vertical-align:-0.3em')} ${esc(q.hint)} ${q.time?`<button class="btn" style="font-size:22px;padding:6px 16px" onclick="startTimer(${q.time})">⏱ ${q.time>=60?(q.time/60)+'분':q.time+'초'} 시작</button>`:''}</div>`:''}
-    ${qshow?`<div class="qans" style="height:330px;width:720px;margin-top:-30px">${spr(SP.reveal,'<div style="position:absolute;inset:0;background:#fff8e8;border-radius:30px"></div>')}<span class="f" style="text-align:center;line-height:1;font-size:50px;display:flex;flex-direction:column;align-items:center;gap:2px">${esc(q.a)}<small style="font-size:24px;color:#6c6455;line-height:1">${esc(/쪽|장/.test(q.page)?q.page:'교과서 '+q.page+'쪽')}</small></span></div>
+    ${q.video?`<div style="font-size:30px;margin-top:14px"><button class="btn" style="font-size:30px" onclick="showVideoOf(LESSONS[S.lesson].quiz[${qi}].video,'준비!')">▶ ${esc(q.video.t)} · ${esc(q.video.len)}</button></div>`:qshow?`<div class="qans" style="height:330px;width:720px;margin-top:-30px">${spr(SP.reveal,'<div style="position:absolute;inset:0;background:#fff8e8;border-radius:30px"></div>')}<span class="f" style="text-align:center;line-height:1;font-size:50px;display:flex;flex-direction:column;align-items:center;gap:2px">${esc(q.a)}<small style="font-size:24px;color:#6c6455;line-height:1">${esc(/쪽|장/.test(q.page)?q.page:'교과서 '+q.page+'쪽')}</small></span></div>
       <div class="qhit">맞힌 모둠 (모둠 점수) ${['1','2','3','4','5','6'].map(g=>`<button class="${hits.includes(g)?'on':''}" data-hit="${g}">${g}</button>`).join('')}
         <span style="margin-left:14px">지금까지: ${Object.keys(total).length?Object.keys(total).sort().map(g=>`${g}모둠 ${total[g]}`).join(' · '):'—'}</span></div>`:'<div style="height:240px"></div>'}`;
   $('quiz').querySelectorAll('[data-qi]').forEach(b=>b.onclick=()=>{ qi=+b.dataset.qi; qshow=!!qseen[qi]; render(); });
@@ -785,11 +793,22 @@ function openEvSheet(){
   $('evs').classList.add('show');
 }
 const PH={
-  quiz:()=>{ const Q=L().quiz||[]; return {g:'point', say:`시작 퀴즈 ${qi+1}번! 문제를 읽어 줄게요. 모둠 보드에 답을 쓰고, “하나, 둘, 셋!”에 들어요.`, small:'정답을 본 뒤 맞힌 모둠 번호를 누르면 모둠 점수가 쌓여요.',
-    b:[[qshow?(qi<Q.length-1?'다음 문제 →':'퀴즈 끝 → 역사 연결 고리 1'):'정답 보기',()=>{ if(!qshow){qshow=true; qseen[qi]=true;} else { qshow=false; qi++; if(qi>=Q.length){ qi=0; S.phase='read'; } else qshow=!!qseen[qi]; } }]].concat(TEACHER?[['퀴즈 건너뛰기',()=>{ qi=0; qshow=false; S.phase='read'; },'s']]:[])}; },
+  quiz:()=>{ const Q=L().quiz||[]; const q=Q[qi]||{};
+    if(q.video) return {g:'point', say:`${esc(q.sec||'')} — <b>영상</b>을 함께 봐요. ${esc(q.video.before||'')}`, small:`${esc(q.video.by)} · ${esc(q.video.len)} · 다 보면 「다음 문제」로 넘어가요.`,
+      b:[['▶ 영상 보기',()=>showVideoOf(q.video,'준비!')],[qi<Q.length-1?'다음 문제 →':'퀴즈 끝 → 양 난 정리',()=>{ qseen[qi]=true; qshow=false; qi++; if(qi>=Q.length){ qi=0; S.phase=L().prep?'end':'read'; } else qshow=!!qseen[qi]; }]]};
+    return {g:'point', say:`${L().prep?'모둠 보드 퀴즈 '+esc(q.sec||''):'시작 퀴즈 '+(qi+1)+'번'}! 문제를 읽어 줄게요. 모둠 보드에 답을 쓰고, “하나, 둘, 셋!”에 들어요.`, small:'정답을 본 뒤 맞힌 모둠 번호를 누르면 모둠 점수가 쌓여요.',
+    b:[[qshow?(qi<Q.length-1?'다음 문제 →':(L().prep?'퀴즈 끝 → 양 난 정리':'퀴즈 끝 → 역사 연결 고리 1')):'정답 보기',()=>{ if(!qshow){qshow=true; qseen[qi]=true;} else { qshow=false; qi++; if(qi>=Q.length){ qi=0; S.phase=L().prep?'end':'read'; } else qshow=!!qseen[qi]; } }]].concat(TEACHER?[['퀴즈 건너뛰기',()=>{ qi=0; qshow=false; S.phase=L().prep?'end':'read'; },'s']]:[])}; },
   read:()=>{ const Rg=R(); const b=[]; const needLink=S.ring>0 && !S.linked[S.ring-1];
     if(needLink){ if(Rg.bridgeA && !bridgeOpen) b.push([(Rg.bridgePage?Rg.bridgePage+'쪽 ':'')+'단서 보기',()=>{ bridgeOpen=true; },'s']);
       b.push(['이어져요! 사슬 연결',()=>{ S.linked[S.ring-1]=true; bridgeOpen=false; }]); }
+    if(!needLink && Rg.lecture){
+      if(Rg.memory) b.push([/쇄미록/.test(Rg.memory.src)?'① 게임 기억 카드':'① 함께 읽는 사료',()=>showOne(S.ring,'memo'),'s']);
+      b.push(['학습지 채울 내용',()=>{ const op=chkOpen[S.ring]=chkOpen[S.ring]||new Set(); Rg.match.pairs.forEach((_,i)=>op.add(i)); openCheck(); },'s']);
+      (Rg.video||[]).forEach((v,k)=>b.push(['▶ 영상'+((Rg.video.length>1)?' '+(k+1):''),()=>showVideo(S.ring,k),'s']));
+      if(Rg.texts) b.push(['자료 크게',()=>showPair(S.ring),'s']);
+      b.push([PHNAME[nextPh('read')]+' →',()=>{ toPh(nextPh('read')); }]);
+      return {g:'point', say:`역사 연결 고리 ${S.ring+1} — “${esc(Rg.name)}”. <b>선생님 강의 고리</b>예요.<br>학습지에 채울 내용을 먼저 함께 채우고, ${(Rg.video||[]).some(v=>!v.opt)?'영상을 본 뒤 ':''}선생님 설명을 들어요. 교과서 <b>${Rg.page}쪽</b>을 펼쳐 봅시다.`,
+        small:`찾을 낱말: ${esc(Rg.words||'')} · 다음 단계에서 반이 함께 분류해요.`, b}; }
     if(!needLink){ if(!Rg.match) b.push(['이렇게 해요',()=>openHow('ring')]);
       (Rg.video||[]).forEach((v,k)=>b.push(['▶ 영상'+((Rg.video.length>1)?' '+(k+1):''),()=>showVideo(S.ring,k),'s']));
       if(Rg.memory) b.push([/쇄미록/.test(Rg.memory.src)?'① 게임 기억 카드':'① 함께 읽는 사료',()=>showOne(S.ring,'memo'),'s']);
@@ -802,10 +821,10 @@ const PH={
       small: needLink ? '두 모둠이 답하면 「단서 보기」로 확인 → 「사슬 연결」' : `찾을 낱말: ${esc(Rg.words||'')}`, b}; },
   pair:()=>{ const n=S.cards.filter(c=>c.ring===S.ring&&!c.std&&c.k!=='q').length, h=(S.help||[]).filter(x=>x.ring===S.ring&&!x.done).length;
     if(R().match&&R().together) return {g:'point', say:`<b>다 함께 고리!</b> 자료를 함께 읽고 「선 잇기 정답 확인」을 열어요.<br>까닭을 읽으면, 초성을 보고 결과를 맞힌 모둠이 손을 들어요.`, small:'맞히면 기록 이끄미가 결과 칸을 눌러 열어요.',
-      b:[['② 자료 크게',()=>showPair(S.ring),'s'],['선 잇기 정답 확인',()=>openCheck()],[PHNAME[nextPh('pair')]+' →',()=>{ S.phase=nextPh('pair'); }]]};
+      b:[['② 자료 크게',()=>showPair(S.ring),'s'],['선 잇기 정답 확인',()=>openCheck()],[PHNAME[nextPh('pair')]+' →',()=>{ toPh(nextPh('pair')); }]]};
     if(R().match) return {g:'card', say:`짝끼리 읽은 것을 모둠에 설명하고, 학습지 <b>선 잇기</b>를 함께 해요.<br>다 하면 「선 잇기 정답 확인」으로 하나씩 맞혀 봐요.`,
       small:`막힌 모둠은 손을 들어요 → 기록 이끄미가 도움 깃발을 세워요 · 도움 깃발 ${h}개`,
-      b:[['⏱ 3분',()=>startTimer(180),'s'],['⏱ 5분',()=>startTimer(300),'s'],['선 잇기 정답 확인',()=>openCheck()],[PHNAME[nextPh('pair')]+' →',()=>{ S.phase=nextPh('pair'); }]]};
+      b:[['⏱ 3분',()=>startTimer(180),'s'],['⏱ 5분',()=>startTimer(300),'s'],['선 잇기 정답 확인',()=>openCheck()],[PHNAME[nextPh('pair')]+' →',()=>{ toPh(nextPh('pair')); }]]};
     const b=[['⏱ 3분',()=>startTimer(180),'s'],['⏱ 5분',()=>startTimer(300),'s']]; if(R().match) b.push(['선 잇기 답 맞추기',()=>openMatch()]);
     b.push(['카드 확인하기 →',()=>{ S.phase='check'; laneFocus=''; }]); 
     return {g:'card', say:`짝끼리 설명하고 학습지 <b>선 잇기</b>를 해요. → 모둠 한 문장!<br><span style="color:#9FD6CD">까닭 “○○ 때문에”</span> · <span style="color:#F2B98F">결과 “그래서 △△ 했다”</span>`,
@@ -816,10 +835,10 @@ const PH={
     if(R().match){ const n=S.cards.filter(c=>c.ring===S.ring&&c.k==='c'&&c.who!=='연표').length;
       return {g:'thumb', say:`<b>모둠 한 줄!</b> 칠판의 우리 모둠 칸에 적힌 <b>맡은 짝</b>을 모둠 보드에 써요.<br>“○○ 때문에 → △△ 했다.” 다 쓰면 보드를 들고 발표해요.`,
         small:`기록 이끄미가 모둠 번호를 고르고 칠판에 문장을 작성해요 · 지금 ${n}모둠`,
-        b:[['⏱ 2분',()=>startTimer(120),'s'],[PHNAME[nextPh('check')]+' →',()=>{ S.phase=nextPh('check'); }]]}; }
+        b:[['⏱ 2분',()=>startTimer(120),'s'],[PHNAME[nextPh('check')]+' →',()=>{ toPh(nextPh('check')); }]]}; }
     return {g:'thumb', say:`카드를 하나씩 읽어요. <b>“이 카드, 여기 맞아요?”</b> 그다음 <b>교과서 단서 카드</b>를 열어 우리 카드와 비교해요.`, small:'기록 이끄미가 카드를 눌러 ✔ · 옮기기 · 지우기를 해요.',
      b:[ ['교과서 단서 카드',()=>openEvSheet()], (v&3)===3?['각자 연표에 한 줄 →',()=>{ S.phase='write'; laneFocus=''; }]:null ].filter(Boolean)}; },
-  sort:()=>({g:'point', say:`<b>분류하기!</b> 진행 이끄미가 모둠 한 줄을 하나씩 읽으면, 반이 함께 “${(R().cats||[]).map(c=>c.n).join(', ')} 중 어디?”를 정해요.`, small:'기록 이끄미가 카드를 눌러 알맞은 칸으로 옮겨요. 비어 있는 칸은 “이 칸을 채울 수 있는 모둠?”',
+  sort:()=>({g:'point', say:`<b>분류하기!</b> 진행 이끄미가 선 잇기 짝을 하나씩 읽으면, 반이 함께 “${(R().cats||[]).map(c=>c.n).join(', ')} 중 어디?”를 정해요.`, small:'기록 이끄미가 카드를 눌러 알맞은 칸으로 옮겨요. 비어 있는 칸은 “이 칸을 채울 수 있는 모둠?”',
      b:[['우리 반 한 줄 →',()=>{ S.phase='write'; }]]}),
   write:()=>R().match?({g:'card2', say:`${R().cats?'세 칸을':'선 잇기에서 이은 까닭 → 결과를'} 보며 문장 틀을 채워 <b>우리 반 한 줄</b>을 만들어요. 그다음 각자 「역사 흐름 연표」 종이에 써요.`, small:'기록 이끄미가 아래 칸에 우리 반 한 줄을 작성해요(카드를 눌러 ⭐로 가져올 수도 있어요). 다 쓰면 「고리 완성」.',
      b:[['역사 연결 고리 완성 → 학급 도장',()=>{ nextAfterWrite(); setTimeout(()=>openTimeline(S.ring-(S.phase==='read'?1:0)),400); }]]})
@@ -827,18 +846,22 @@ const PH={
      b:[['역사 연결 고리 완성 → 학급 도장',()=>{ nextAfterWrite(); setTimeout(()=>openTimeline(S.ring-(S.phase==='read'?1:0)),400); }]]}),
   question:()=>({g:'card', say:`마지막 카드! 모둠마다 <b>질문 하나</b>: ${esc(L().closeQuestion||'')}`, small:`모은 질문 ${S.cards.filter(c=>c.k==='q').length}장 · 기록 이끄미가 오른쪽 「우리 반 질문」 칸에 모둠 번호를 고르고 써서 「넣기」를 눌러요. 선생님이 다음 차시에 골라 써요.`,
      b:[['역사 연결 사슬 말하기 →',()=>S.phase='end']]}),
-  end:()=>({g:'thumb', b0:1, say:`마무리 <b>역사 연결 사슬 말하기</b>: 뽑힌 모둠의 한 사람이 ${L().rings.length>2?'고리 1부터 고리 '+L().rings.length+'까지':'고리 1과 고리 2를'} 사슬로 이어 한 번에 말해요.`, small:`오늘의 모둠 점수: ${scoreLine()} · 우리 반 연표를 띄워 놓고 말하면 쉬워요. 끝나면 다음 시간 이끄미를 뽑을 차례예요.`,
+  end:()=>L().prep?({g:'thumb', say:`<b>양 난 정리!</b> 모둠마다 맡은 주제를 모둠 보드에 “${esc(L().sum.frame)}”로 써서 들어요.`, small:`예) ${esc(L().sum.ex)} · 오늘의 모둠 점수: ${scoreLine()}`,
+     b:[['⏱ 3분',()=>startTimer(180),'s'],['5차시 미리 시작 →',()=>{ S.lesson=5; S.ring=0; S.phase='lotto'; S.done=[false,false,false,false]; S.linked=[false,false,false]; S.stdShown=[0,0,0,0]; qi=0; qshow=false; qseen={}; }]]})
+  :({g:'thumb', b0:1, say:`마무리 <b>역사 연결 사슬 말하기</b>: 뽑힌 모둠의 한 사람이 ${L().rings.length>2?'고리 1부터 고리 '+L().rings.length+'까지':'고리 1과 고리 2를'} 사슬로 이어 한 번에 말해요.`, small:`오늘의 모둠 점수: ${scoreLine()} · 우리 반 연표를 띄워 놓고 말하면 쉬워요. 끝나면 다음 시간 이끄미를 뽑을 차례예요.`,
      b:[['모둠 뽑기',()=>openTalk()],['우리 반 연표 보기',()=>openTimeline(),'s'],['처음부터 다시 (카드 지우기)',()=>{ if(!confirm('이 학급의 카드와 단계를 처음으로 돌릴까요? (이끄미 이름 목록은 남아요)')) return; act({a:'reset',code:CODE}).then(r=>{ if(r.ok){ S=Object.assign(freshState(),r.st); SERVER=clone(S); render(); } }); },'s']]})
 };
 /* 퀘스트 순서 띠 */
 function renderQuest(){
   const rs=L().rings, ph=S.phase;
+  if(L().prep){ const st=[['모둠 보드 퀴즈',ph==='quiz',ph==='end'],['양 난 정리',ph==='end',false],['5차시 미리 시작',false,false]];
+    $('quest').classList.remove('many'); $('quest').innerHTML=st.map(([t,on,ok],i)=>`${i?'<span class="qarrow">›</span>':''}<span class="qs ${on?'on':ok?'ok':''}"><i>${ok&&!on?'✔':i+1}</i>${t}</span>`).join(''); return; }
   const steps=[['이끄미 뽑기',ph==='lotto',ph!=='lotto'],['시작 퀴즈',ph==='quiz',!['lotto','quiz'].includes(ph)]];
   rs.forEach((Rg,i)=>{ if(i>0) steps.push(['역사 연결 사슬',S.ring===i&&ph==='read'&&!S.linked[i-1],!!S.linked[i-1]]);
     steps.push(['역사 연결 고리 '+(i+1),S.ring===i&&!['lotto','quiz','end','question'].includes(ph)&&!(i>0&&ph==='read'&&!S.linked[i-1]),!!S.done[i]]); });
   if(L().closeQuestion) steps.push(['질문 카드',ph==='question',ph==='end']);
   steps.push(['역사 연결 사슬 말하기',ph==='end',false]);
-  const sub = (R()&&R().match?{read:'자료 읽기',pair:R().together?'다 함께 선 잇기':'선 잇기',check:'모둠 한 줄',sort:'분류하기',write:'우리 반 한 줄'}:{read:'자료 읽기',pair:'모둠 활동',together:'다 함께',check:'확인',write:'연표 쓰기'})[ph];
+  const sub = (R()&&R().match?{read:R().lecture?'선생님 강의':'자료 읽기',pair:R().together?'다 함께 선 잇기':'선 잇기',check:'모둠 한 줄',sort:'분류하기',write:'우리 반 한 줄'}:{read:'자료 읽기',pair:'모둠 활동',together:'다 함께',check:'확인',write:'연표 쓰기'})[ph];
   $('quest').classList.toggle('many', steps.length>7);
   $('quest').innerHTML=steps.map(([t,on,ok],i)=>`${i?'<span class="qarrow">›</span>':''}<span class="qs ${on?'on':ok?'ok':''}"><i>${ok&&!on?'✔':i+1}</i>${t}${on&&sub&&t.startsWith('역사')?` · ${sub}`:''}</span>`).join('')
     ;
@@ -850,6 +873,7 @@ function lockReason(){
   const mine=S.cards.filter(c=>c.ring===S.ring&&c.who!=='연표');
   if(S.phase==='read'){
     if(S.ring>0 && !S.linked[S.ring-1]) return '';
+    if(Rg.lecture) return '';
     if(Rg.memory && !hasSeen(S.ring,'memo')) return (/쇄미록/.test(Rg.memory.src)?'① 게임 기억 카드':'① 함께 읽는 사료')+'를 먼저 열어요';
     if(Rg.texts && !hasSeen(S.ring,'pair')) return '② 자료를 먼저 열어요';
     return ''; }
@@ -920,6 +944,7 @@ function jump(lesson, ring, phase){
   S.stdShown=[0,1,2,3].map(i=>i<ring?3:0); laneFocus=''; bridgeOpen=false;
   if(phase!=='lotto' && S.leaders.length<2){ if(S.names.length<2) S.names=['가람','나래','다온']; S.leaders=S.names.slice(0,2); S.used=S.leaders.slice(); }
   if(phase==='quiz'){ qi=0; qshow=false; }
+  if(phase==='sort') seedSort(ring);
   commit();
 }
 function renderReview(){
@@ -928,7 +953,7 @@ function renderReview(){
   const ph=[['lotto','뽑기'],['quiz','시작 퀴즈']];
   const btn=(on,label,fn)=>`<button class="${on?'on':''}" onclick="${fn}">${label}</button>`;
   let h=`<b>검토 패널</b> (수업 때는 보이지 않음) <button onclick="$('rv').classList.toggle('min')">접기/펴기</button>
-    <div class="rr">차시 ${Object.keys(LESSONS).map(k=>btn(+k===S.lesson,k+'차시',`jump(${k},0,'lotto')`)).join('')}</div>
+    <div class="rr">차시 ${Object.keys(LESSONS).map(k=>btn(+k===S.lesson,LNAME(k),`jump(${k},0,LESSONS[k].prep?'quiz':'lotto')`)).join('')}</div>
     <div class="rr">${ph.map(([p,l])=>btn(S.phase===p,l,`jump(${S.lesson},0,'${p}')`)).join('')}</div>`;
   rs.forEach((R0,i)=>{ const main=R0.mode==='together'?['together','다 함께']:['pair',R0.match?'선 잇기':'모둠 활동'];
     h+=`<div class="rr">역사 연결 고리 ${i+1}·${esc(R0.name)}: ${(R0.match? flowOf(R0).map(p=>[p,{read:i?'사슬·자료 읽기':'자료 읽기',pair:'선 잇기',check:'모둠 한 줄',sort:'분류하기',write:'우리 반 한 줄'}[p]]) : [['read',i?'사슬·자료 읽기':'자료 읽기'],main,['check','확인'],['write','연표 쓰기']]).map(([p,l])=>btn(S.ring===i&&S.phase===p,l,`jump(${S.lesson},${i},'${p}')`)).join('')}</div>`; });
@@ -942,7 +967,7 @@ function renderReview(){
 /* ---------------- 상태 ---------------- */
 let HK;
 function autoHow(){ /* 한 장짜리 안내는 자동으로 띄우지 않음(단계마다 '지금 할 일' 띠) — 나중에 안내 영상으로 */ }
-function render(){ renderReview(); renderQuest(); autoHow(); $('ttl').innerHTML=(typeof SERIES!=='undefined'?`<div class="kick"><b>${esc(SERIES.school)}</b> ${esc(SERIES.slogan)} <span>${S.lesson}차시 / ${esc(SERIES.of)}</span></div>`:'')+esc(L().title)+(L().goal?`<div style="font-size:19px;color:#D9E6DC;font-family:SeoulHangangJang,sans-serif;margin-top:4px;line-height:1.25"><b style="color:#E8C27A">오늘의 목표</b> ${esc(L().goal)}</div>`:''); if($('lkick')&&typeof SERIES!=='undefined') $('lkick').innerHTML=`${esc(SERIES.school)} · <b>${esc(SERIES.slogan)}</b>`; $('l1').textContent=S.leaders[0]||'—'; $('l2').textContent=S.leaders[1]||'—'; renderMain(); renderBottom(); renderLotto(false); renderQuiz(); }
+function render(){ if(L().prep && !['quiz','end'].includes(S.phase)) S.phase='quiz'; renderReview(); renderQuest(); autoHow(); $('ttl').innerHTML=(typeof SERIES!=='undefined'?`<div class="kick"><b>${esc(SERIES.school)}</b> ${esc(SERIES.slogan)} <span>${LNAME(S.lesson)} / ${esc(SERIES.of)}</span></div>`:'')+esc(L().title)+(L().goal?`<div style="font-size:19px;color:#D9E6DC;font-family:SeoulHangangJang,sans-serif;margin-top:4px;line-height:1.25"><b style="color:#E8C27A">오늘의 목표</b> ${esc(L().goal)}</div>`:''); if($('lkick')&&typeof SERIES!=='undefined') $('lkick').innerHTML=`${esc(SERIES.school)} · <b>${esc(SERIES.slogan)}</b>`; $('l1').textContent=S.leaders[0]||'—'; $('l2').textContent=S.leaders[1]||'—'; renderMain(); renderBottom(); renderLotto(false); renderQuiz(); }
 const KEYS=PATCH_KEYS;
 function diff(a,b){
   const set={}; KEYS.forEach(k=>{ if(JSON.stringify(a[k])!==JSON.stringify(b[k])) set[k]=b[k]; });
@@ -979,9 +1004,9 @@ async function checkLessonChange(){
   const fresh = S.phase==='lotto' && !(S.cards||[]).length && !(S.leaders||[]).length;
   if(fresh){ S.lesson=want; commit(); return true; }
   if(TRY_CLASS){ return false; }
-  if(!confirm(`${CLASS}반은 지난번에 ${S.lesson}차시를 했어요.
-${want}차시를 새로 시작할까요?
-(${S.lesson}차시 우리 반 연표는 이 컴퓨터에 보관되고, 이끄미 후보 이름은 그대로 남아요)`)) return false;
+  if(!confirm(`${CLASS}반은 지난번에 ${LNAME(S.lesson)}를 했어요.
+${LNAME(want)}를 새로 시작할까요?
+(${LNAME(S.lesson)} 우리 반 연표는 이 컴퓨터에 보관되고, 이끄미 후보 이름은 그대로 남아요)`)) return false;
   archiveLesson(S); const keep={names:S.names, used:S.used};
   const r=await act({a:'reset',code:CODE}); if(!r.ok){ alert('새 차시로 바꾸지 못했어요. 진행 코드를 확인해 주세요.'); return false; }
   SERVER=Object.assign(freshState(), r.st); S=Object.assign(clone(SERVER), {lesson:want, phase:'lotto', ring:0, names:keep.names, used:keep.used, leaders:[]}); qhits={}; qseen={}; qi=0; qshow=false; await commit(); return true;
